@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <StartupObject></StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Http.Connections.Client" Version="9.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+	<PackageReference Include="Microsoft.OpenApi" Version="1.6.22" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharedModels\SharedModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="spirallab.reallink.client">
+      <HintPath>..\..\bin\net8.0-windows\spirallab.reallink.client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

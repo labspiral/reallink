@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+	<TargetFrameworks>net462;net8.0-windows</TargetFrameworks>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="9.0.0" />
+	</ItemGroup>
+
+</Project>

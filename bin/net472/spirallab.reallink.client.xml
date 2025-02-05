@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>spirallab.reallink.client</name>
+    </assembly>
+    <members>
+        <member name="T:SpiralLab.RealLink.Client">
+            <summary>
+            Client for SpiralLab.RealLink
+            </summary>
+        </member>
+        <member name="P:SpiralLab.RealLink.Client.Url">
+            <summary>
+            URL
+            </summary>
+        </member>
+        <member name="P:SpiralLab.RealLink.Client.UserName">
+            <summary>
+            User(or clent) name
+            </summary>
+        </member>
+        <member name="P:SpiralLab.RealLink.Client.IsConnected">
+            <summary>
+            Is connected to <c>reallink</c> server or not
+            </summary>
+        </member>
+        <member name="E:SpiralLab.RealLink.Client.Closed">
+             <summary>
+             Occurs when the connection is closed. The connection could be closed due to an error or due to either the server or client intentionally
+             closing the connection without error.
+             </summary>
+             <remarks>
+             If this event was triggered from a connection error, the <see cref="T:System.Exception"/> that occurred will be passed in as the
+             sole argument to this handler. If this event was triggered intentionally by either the client or server, then
+             the argument will be <see langword="null"/>.
+             </remarks>
+             <example>
+             The following example attaches a handler to the <see cref="E:SpiralLab.RealLink.Client.Closed"/> event, and checks the provided argument to determine
+             if there was an error:
+            
+             <code>
+             connection.Closed += (exception) =>
+             {
+                 if (exception == null)
+                 {
+                     Console.WriteLine("Connection closed without error.");
+                 }
+                 else
+                 {
+                     Console.WriteLine($"Connection closed due to an error: {exception}");
+                 }
+             };
+             </code>
+             </example>
+        </member>
+        <member name="E:SpiralLab.RealLink.Client.Reconnecting">
+             <summary>
+             Occurs when starts reconnecting after losing its underlying connection.
+             </summary>
+             <remarks>
+             The <see cref="T:System.Exception"/> that occurred will be passed in as the sole argument to this handler.
+             </remarks>
+             <example>
+             The following example attaches a handler to the <see cref="E:SpiralLab.RealLink.Client.Reconnecting"/> event, and checks the provided argument to log the error.
+            
+             <code>
+             client.Reconnecting += (exception) =>
+             {
+                 Console.WriteLine($"Connection started reconnecting due to an error: {exception}");
+             };
+             </code>
+             </example>
+        </member>
+        <member name="E:SpiralLab.RealLink.Client.Reconnected">
+             <summary>
+             Occurs when client successfully reconnects after losing its underlying connection.
+             </summary>
+             <example>
+             The following example attaches a handler to the <see cref="E:SpiralLab.RealLink.Client.Reconnected"/> event, and checks the provided argument to log the ConnectionId.
+            
+             <code>
+             connection.Reconnected += () =>
+             {
+                 Console.WriteLine($"Connection successfully reconnected.");
+             };
+             </code>
+             </example>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="url">URL <br/>For example: http://localhost:5000</param>
+            <param name="hubName">Hub name<br/>For example: "reallink1"</param>
+            <param name="userName">Client(or user) name<br/>For example: handler, mmi, vision, ... <br/>"all", "broadcast" or "others" are reserved.</param>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.Dispose(System.Boolean)">
+            <summary>
+            Dispose internal resources
+            </summary>
+            <param name="disposing">Flag for disposing</param>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.Start">
+            <summary>
+            Start to connect <c>reallink</c> server
+            <para>
+            Must be executed <c>spirallab.reallink.server.exe</c> at first. <br/>
+            </para>
+            </summary>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.Reconnect">
+            <summary>
+            Reconnect to <c>reallink</c> server
+            </summary>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.Stop">
+            <summary>
+            Stop(or disconnect) to <c>reallink</c> server
+            </summary>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.On(System.String,System.Type[],System.Func{System.Object[],System.Object,System.Threading.Tasks.Task{System.Object}},System.Object)">
+            <summary>
+            Registers a handler that will be invoked when the hub method with the specified method name is invoked.
+            Returns value returned by handler to server if the server requests a result.
+            </summary>
+            <param name="methodName">The name of the hub method to define.</param>
+            <param name="parameterTypes">The parameters types expected by the hub method.</param>
+            <param name="handler">The handler that will be raised when the hub method is invoked.</param>
+            <param name="state">A state object that will be passed to the handler.</param>
+            <returns>A subscription that can be disposed to unsubscribe from the hub method.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.On(System.String,System.Type[],System.Func{System.Object[],System.Object,System.Threading.Tasks.Task},System.Object)">
+            <summary>
+            Registers a handler that will be invoked when the hub method with the specified method name is invoked.
+            </summary>
+            <param name="methodName">The name of the hub method to define.</param>
+            <param name="parameterTypes">The parameters types expected by the hub method.</param>
+            <param name="handler">The handler that will be raised when the hub method is invoked.</param>
+            <param name="state">A state object that will be passed to the handler.</param>
+            <returns>A subscription that can be disposed to unsubscribe from the hub method.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and argument.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Object,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="arg4">The fourth argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.SendAsync(System.String,System.Object,System.Object,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            Does not wait for a response from the receiver.
+            </summary>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="arg4">The fourth argument.</param>
+            <param name="arg5">The fifth argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.</returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and argument.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Object,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="arg4">The fourth argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="M:SpiralLab.RealLink.Client.InvokeAsync``1(System.String,System.Object,System.Object,System.Object,System.Object,System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Invokes a hub method on the server using the specified method name and arguments.
+            </summary>
+            <typeparam name="TResult">The return type of the server method.</typeparam>
+            <param name="methodName">The name of the server method to invoke.</param>
+            <param name="arg1">The first argument.</param>
+            <param name="arg2">The second argument.</param>
+            <param name="arg3">The third argument.</param>
+            <param name="arg4">The fourth argument.</param>
+            <param name="arg5">The fifth argument.</param>
+            <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="P:System.Threading.CancellationToken.None" />.</param>
+            <returns>
+            A <see cref="T:System.Threading.Tasks.Task`1"/> that represents the asynchronous invoke.
+            The <see cref="P:System.Threading.Tasks.Task`1.Result"/> property returns a <typeparamref name="TResult"/> for the hub method return value.
+            </returns>
+        </member>
+        <member name="T:SpiralLab.RealLink.Helper">
+            <summary>
+            Helper class
+            </summary>
+        </member>
+        <member name="M:SpiralLab.RealLink.Helper.Deserialize``1(System.Object)">
+            <summary>
+            Deserialze target <c>object</c>
+            </summary>
+            <typeparam name="T">Target type</typeparam>
+            <param name="arg">Raw <c>object</c></param>
+            <returns>Deserialzed object (return <c>null</c> if failed)</returns>
+        </member>
+    </members>
+</doc>
