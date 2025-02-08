@@ -32,13 +32,10 @@ typedef struct tagUnit
 
 typedef struct tagSubstrate 
 {
-    std::string UniqueName; 
-
+    std::string Name; 
     int Rows;
     int Cols;
     std::vector<UNIT> Units;
-    std::vector<UNIT> Debries;
-
 
 public:
     struct tagSubstrate()
@@ -46,13 +43,13 @@ public:
     }
     struct tagSubstrate(std::string uniqueName)
     {
-        UniqueName = uniqueName;
+        Name = uniqueName;
     }
 
     void Serialize(nlohmann::json& jsonDestination)
     {
         //ref link : https://snowdeer.github.io/c++/2022/01/11/cpp-nlohmann-json-example/
-        jsonDestination["uniqueName"] = UniqueName;
+        jsonDestination["name"] = Name;
         jsonDestination["cols"] = Cols;
         jsonDestination["rows"] = Rows;
         nlohmann::json units;
@@ -66,53 +63,25 @@ public:
             units.push_back(unit);
         }
         jsonDestination["units"] = units;
-     
-        nlohmann::json debries;
-        for (int i = 0; i< Debries.size(); i++)
-        {
-            nlohmann::json debri = {
-                {"col", Debries[i].Col},
-                {"row", Debries[i].Row},
-                {"bin", Debries[i].Bin}
-            };
-            debries.push_back(debri);
-        }
-        jsonDestination["debries"] = debries;
     }
 
     bool Deserialize(const nlohmann::json& jsonSource)
     {
         Units.clear();
-        Debries.clear();
-        try
-        {
-            UniqueName = jsonSource["uniqueName"];
-            Cols = (int)jsonSource["cols"];
-            Rows = (int)jsonSource["rows"];
+        Name = jsonSource["name"];
+        Cols = (int)jsonSource["cols"];
+        Rows = (int)jsonSource["rows"];
 
-            for (int i = 0; i < jsonSource["units"].size(); i++)
-            {
-                UNIT unit;
-                unit.Col = jsonSource["units"][i]["col"];
-                unit.Row = jsonSource["units"][i]["row"];
-                unit.Bin = jsonSource["units"][i]["bin"];
-                Units.push_back(unit);
-            }
-
-            for (int i = 0; i < jsonSource["debries"].size(); i++)
-            {
-                UNIT unit;
-                unit.Col = jsonSource["units"][i]["col"];
-                unit.Row = jsonSource["units"][i]["row"];
-                unit.Bin = jsonSource["units"][i]["bin"];
-                Debries.push_back(unit);
-            }
-            return true;
-        }
-        catch (...)
+        for (int i = 0; i < jsonSource["units"].size(); i++)
         {
-            return false;
+            UNIT unit;
+            unit.Col = jsonSource["units"][i]["col"];
+            unit.Row = jsonSource["units"][i]["row"];
+            unit.Bin = jsonSource["units"][i]["bin"];
+            Units.push_back(unit);
         }
+        return true;
+       
     }
     
 }SUBSTRATE;

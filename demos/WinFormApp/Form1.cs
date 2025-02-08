@@ -22,6 +22,7 @@ namespace WindowsFormsApp
         public Form1()
         {
             InitializeComponent();
+            client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "winformapp");
         }
 
 
@@ -35,13 +36,19 @@ namespace WindowsFormsApp
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            client?.Stop();
+            try
+            {
+                client?.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
         }
 
         private async void btnStart_Click(object sender, EventArgs e)
         {
-            Debug.Assert(client == null);
-            client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "winformapp");           
+            Debug.Assert(client != null);
             client.On("Receive",
                 new[] { typeof(string), typeof(string), typeof(object) },
                 (args, state) =>
@@ -62,7 +69,7 @@ namespace WindowsFormsApp
             try
             {
                 AddLogMessage("reallink is starting ...");
-                await client.Start();
+                await client.StartAsync();
             }
             catch (Exception ex)
             {
@@ -73,7 +80,14 @@ namespace WindowsFormsApp
         private async void btnReconnect_Click(object sender, EventArgs e)
         {
             AddLogMessage("reallink is reconnecting...");
-            await client?.Reconnect();
+            try
+            {
+                await client?.ReconnectAsync();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
         }
 
         long no = 0;
@@ -106,9 +120,15 @@ namespace WindowsFormsApp
         private void btnStop_Click(object sender, EventArgs e)
         {
             AddLogMessage($"reallink is stopping");
-            client?.Stop();
+            try
+            {
+                client?.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
         }
-
 
     }
 }

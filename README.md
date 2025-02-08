@@ -35,7 +35,7 @@
 ----
 
 
-**5. Libraries**
+**4. Libraries**
 
  - spirallab.reallink.client.dll
     - Library for .NET client
@@ -54,7 +54,7 @@
 ----
 
 
-**6. How to use ?**
+**5. How to use ?**
 
  - Must be execute reallink server "spirallab.reallink.server.exe" program at first.
     - download latest version: http://spirallab.co.kr/reallink/spirallab.reallink.server.zip
@@ -75,14 +75,36 @@
  ----
 
 
-**7. Examples**
+**6. Examples**
 
  - Demo 'console app' console project for .NET framework c# client 
  - Demo 'cpp app' console project for c++ client example
  - Demo 'winforms app' project for .NET framework winforms c# client
  - Demo 'wpf app' console project for .NET framework WPF c# client
  
+  
+----
 
+
+**7. Core Methods**
+
+ - For .NET clients
+    - var client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "my_username");
+    - client.On("Receive", new[] { typeof(string), typeof(string), typeof(object) }, (args, state) => { ... });
+    - client.StartAsync();
+    - client.InvokeAsync&lt;TResult&gt;("Send", "target_username", "command", object);
+ - For c++ clients
+    - reallinkcpp::RealLinkClient* pRealLink = reallinkcpp::CreateRealLink("http://localhost:5000", "reallink1", "my_username");
+    - void __cdecl OnReceive(const std::vector<reallinkcpp::value>& m) { ... }
+    - void __cdecl OnReceiveForReturn(const std::vector<reallinkcpp::value>& m) { ... }
+    - pRealLink->On("Receive", &OnReceive);
+    - pRealLink->On("ReceiveForReturn", &OnReceiveForReturn);
+    - pRealLink->Start();
+    - reallinkcpp::value v;
+    - ...
+    - pRealLink->Send("target_username", "command", v);
+
+ 
 ----
 
   
@@ -99,5 +121,5 @@
 
 **9. Version history**
 
-* 2025.2.5 v1.0
+* 2025.2.5 v1.0.0
    - first commit 

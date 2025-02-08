@@ -53,17 +53,14 @@ void __cdecl OnReceiveForReturn(const std::vector<reallinkcpp::value>& m)
     }
 }
 
-
 void CreateSubstrateAndSend(std::string name)
 {
     SUBSTRATE sub;
-    sub.UniqueName = name;
+    sub.Name = name;
     sub.Rows = 1;
     sub.Cols = 2;
     sub.Units.push_back(UNIT(0, 1, 2));
     sub.Units.push_back(UNIT(3, 4, 100));
-    sub.Debries.push_back(UNIT(4, 8, 234));
-    sub.Debries.push_back(UNIT(9, 10, 123));
 
     nlohmann::json j;
     sub.Serialize(j);
@@ -76,7 +73,7 @@ void CreateSubstrateAndSend(std::string name)
 
     bool success = pRealLink->Send("winformapp", "substrate", v);
     if (!success)
-        std::cout << "Failed to send substrate" << std::endl;
+        std::cerr << "Failed to send substrate" << std::endl;
 }
 
 bool QuerySubstrate(std::string name)
@@ -93,7 +90,6 @@ bool QuerySubstrate(std::string name)
     //...
     return true;
 }
-
 
 
 
@@ -117,7 +113,7 @@ int main()
         printf("'Q' : quit\r\n");
         printf("Select your target : ");
 		char ch = _getch();
-        printf("\r\n");
+        std::cout << std::endl;
         switch (ch)
         {
         case 'q':
@@ -125,23 +121,43 @@ int main()
             exit = true;
             break;
         case '1':
-            printf("Starting Reallink Client 'cpp app' is running and try to connect\r\n");
-            pRealLink->Start();
+			std::cout << "Starting Reallink Client 'cpp app' is running and try to connect" << std::endl;
+            try
+            {
+                pRealLink->Start();
+            }
+            catch (const std::exception& e)
+			{
+				std::cerr << e.what() << std::endl;
+			}
             break;
         case '2':
-            printf("Reconnecting Reallink ...\r\n");
-            pRealLink->Reconnect();
+            std::cout << "Reconnecting Reallink ..." << std::endl;
+            try
+            {
+                pRealLink->Reconnect();
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
             break;
         case '3':
             sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i);
             CreateSubstrateAndSend(buf);
             break;
         case '4':
-            pRealLink->Stop();
+            try
+            {
+                pRealLink->Stop();
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
             break;
         }
     } while (!exit);
-
    
     reallinkcpp::DestroyRealLink(&pRealLink);
     return 0;

@@ -11,14 +11,11 @@ namespace ConsoleApp
 {
     internal static class Program
     {
- 
-
         static void Main()
         {
-            
-            var reallink = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "consoleapp");
+            var client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "consoleapp");
           
-            reallink.On("Receive",
+            client.On("Receive",
                 new[] { typeof(string), typeof(string), typeof(object) },
                 (args, state) =>
                 {
@@ -53,11 +50,25 @@ namespace ConsoleApp
                 {
                     case ConsoleKey.D1:
                         Console.WriteLine("Starting Reallink Client 'c# console app' is running and try to connect");
-                        reallink.Start();
+                        try
+                        {
+                            client.StartAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
                         break;
                     case ConsoleKey.D2:
                         Console.WriteLine("Reconnecting Reallink ...");
-                        reallink.Reconnect();
+                        try
+                        {
+                            client.ReconnectAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
                         break;
                     case ConsoleKey.D3:                        
                         var substrate = new Substrate();
@@ -75,7 +86,7 @@ namespace ConsoleApp
                         }
                         try
                         {
-                            Task<bool> result = reallink.InvokeAsync<bool>("Send", "wpfapp", "substrate", substrate);
+                            Task<bool> result = client.InvokeAsync<bool>("Send", "wpfapp", "substrate", substrate);
                         }
                         catch (Exception ex)
                         {
@@ -83,11 +94,18 @@ namespace ConsoleApp
                         }
                         break;
                     case ConsoleKey.D4:
-                        reallink.Stop();
+                        try
+                        {
+                            client.StopAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
                         break;
                 }
             } while (true);
-            reallink?.Dispose();
+            client?.Dispose();
         }
     }
 }

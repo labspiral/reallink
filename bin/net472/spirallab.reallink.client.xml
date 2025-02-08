@@ -103,7 +103,7 @@
         <member name="M:SpiralLab.RealLink.Client.Dispose">
             <inheritdoc/>
         </member>
-        <member name="M:SpiralLab.RealLink.Client.Start">
+        <member name="M:SpiralLab.RealLink.Client.StartAsync">
             <summary>
             Start to connect <c>reallink</c> server
             <para>
@@ -111,12 +111,12 @@
             </para>
             </summary>
         </member>
-        <member name="M:SpiralLab.RealLink.Client.Reconnect">
+        <member name="M:SpiralLab.RealLink.Client.ReconnectAsync">
             <summary>
             Reconnect to <c>reallink</c> server
             </summary>
         </member>
-        <member name="M:SpiralLab.RealLink.Client.Stop">
+        <member name="M:SpiralLab.RealLink.Client.StopAsync">
             <summary>
             Stop(or disconnect) to <c>reallink</c> server
             </summary>

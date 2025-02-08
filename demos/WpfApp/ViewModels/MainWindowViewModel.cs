@@ -11,13 +11,13 @@ using SharedModels;
 using SpiralLab.RealLink;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 
 
 namespace WpfApp.ViewModels
 {
     internal class MainWindowViewModel : ObservableObject
     {
-
         public ObservableCollection<string> LogItems
         {
             get =>  _logItems;
@@ -54,6 +54,7 @@ namespace WpfApp.ViewModels
 
         private async void StartButtonClick()
         {
+            Debug.Assert(_client != null);
             _client.On("Receive",
                 new[] { typeof(string), typeof(string), typeof(object) },
                 (args, state) =>
@@ -71,22 +72,28 @@ namespace WpfApp.ViewModels
                     return Task.CompletedTask;
                 });
 
+            AddLogMessage("reallink is starting ...");
             try
             {
-                AddLogMessage("reallink is starting ...");
-                await _client.Start();
+                await _client.StartAsync();
             }
             catch (Exception ex)
             {
                 AddLogMessage($"{ex.Message}");
-
             }
         }
 
         private async void ReconnectButtonClick()
         {
             AddLogMessage("reallink is reconnecting...");
-            await _client.Reconnect();
+            try
+            {
+                await _client.ReconnectAsync();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
         }
 
         long no = 0;
@@ -118,7 +125,14 @@ namespace WpfApp.ViewModels
         private async void StopButtonClick()
         {
             AddLogMessage("reallink is stopping");
-            await _client.Stop();
+            try
+            {
+                await _client.StopAsync();
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
         }
 
     }

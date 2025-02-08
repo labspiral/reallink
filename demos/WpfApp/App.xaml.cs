@@ -32,7 +32,6 @@ namespace WpfApp
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-
             services.AddTransient<MainWindowViewModel>();
             services.AddSingleton<SpiralLab.RealLink.Client, Client>(factory => new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "wpfapp"));
 
