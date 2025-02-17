@@ -1,5 +1,5 @@
 # REALLINK 
-> REALLINK¢â is library for IPC(inter-process communication) bewteen remote clients 
+> REALLINK is library for IPC(inter-process communication) bewteen remote clients
 ![logo](https://github.com/user-attachments/assets/6600dc0d-21b5-4cef-bfc2-137149e24c67)
 
 ## 1. Features
