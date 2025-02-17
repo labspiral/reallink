@@ -17,14 +17,15 @@ namespace WindowsFormsApp
     public partial class Form1 : Form
     {
         
-        Client client = null;
+        Client _client = null;
 
         public Form1()
         {
             InitializeComponent();
-            client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "winformapp");
-        }
+            _client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "winformapp");
+            RegisterCallBacks();
 
+        }
 
         private void AddLogMessage(string message)
         {
@@ -38,7 +39,7 @@ namespace WindowsFormsApp
         {
             try
             {
-                client?.StopAsync();
+                _client?.StopAsync();
             }
             catch (Exception ex)
             {
@@ -46,30 +47,73 @@ namespace WindowsFormsApp
             }
         }
 
-        private async void btnStart_Click(object sender, EventArgs e)
+        private void RegisterCallBacks()
         {
-            Debug.Assert(client != null);
-            client.On("Receive",
+            _client.Closed += (exception) =>
+            {
+                if (exception == null)
+                    AddLogMessage($"Connection has closed");
+                else
+                    AddLogMessage($"Connection has closed due to an error: {exception.Message}");
+                return Task.CompletedTask;
+            };
+
+            _client.On("Receive",
+               new[] { typeof(string), typeof(string), typeof(object) },
+               (args, state) =>
+               {
+                   string userName = (string)args[0];
+                   string message = (string)args[1];
+                   object arg = args[2];
+                   switch (message)
+                   {
+                       case "substrate":
+                           var substrate = Helper.Deserialize<Substrate>(arg);
+                           AddLogMessage($"Received: {userName}, {message}, {substrate?.ToString()}");
+                           return Task.CompletedTask;
+                       default:
+                           return Task.FromException(new Exception($"Invalid message format: {message}"));
+                   }
+               });
+            _client.On("Response",
                 new[] { typeof(string), typeof(string), typeof(object) },
-                (args, state) =>
+                async (args, state) =>
                 {
-                    string userName = (string)args[0];
+                    string from = (string)args[0];
                     string message = (string)args[1];
                     object arg = args[2];
+                    AddLogMessage($"Response: {from} {message}");
                     switch (message)
                     {
                         case "substrate":
-                            var substrate = Helper.Deserialize<Substrate>(arg);
-                            AddLogMessage($"Received: {userName}, {message}, {substrate?.ToString()}");
-                            break;
+                            var substrate = new Substrate();
+                            var name = Helper.Deserialize<string>(args[2]);
+                            substrate.Name = name;
+                            var rnd = new Random();
+                            for (int i = 0; i < 4000; i++)
+                            {
+                                int col = rnd.Next();
+                                int row = rnd.Next();
+                                int bin = rnd.Next() % 10;
+                                var unit = new Unit(col, row, bin);
+                                substrate.Rows = rnd.Next();
+                                substrate.Cols = rnd.Next();
+                                substrate.Units.Add(unit);
+                            }
+                            return await Task.FromResult(substrate);
+                        default:
+                            return Task.FromException(new Exception($"Invalid message format: {message}"));
                     }
-                    return Task.CompletedTask;
                 });
+        }
 
+        private async void btnStart_Click(object sender, EventArgs e)
+        {
+            AddLogMessage("reallink is starting ...");
+            Debug.Assert(_client != null);
             try
             {
-                AddLogMessage("reallink is starting ...");
-                await client.StartAsync();
+                await _client.StartAsync();
             }
             catch (Exception ex)
             {
@@ -82,7 +126,7 @@ namespace WindowsFormsApp
             AddLogMessage("reallink is reconnecting...");
             try
             {
-                await client?.ReconnectAsync();
+                await _client?.ReconnectAsync();
             }
             catch (Exception ex)
             {
@@ -108,21 +152,34 @@ namespace WindowsFormsApp
             }
             try
             {
-                bool result = await client.InvokeAsync<bool>("Send", "consoleapp", "substrate", substrate);
+                bool result = await _client.InvokeAsync<bool>("Send", "cppapp", "substrate", substrate);
             }
             catch (Exception ex)
             {
                 AddLogMessage($"{ex.Message}");
             }
         }
-
-
-        private void btnStop_Click(object sender, EventArgs e)
+        private async void btnRequest_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // c++ client is not supported 'Request' method
+                //
+                //string name = $"CREATED FROM WINFORM APP {no}";
+                //var substrate = await _client.InvokeAsync<Substrate>("Request", "cppapp", "substrate", name);
+                //AddLogMessage($"Request: {substrate}");
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
+        }
+        private async void btnStop_Click(object sender, EventArgs e)
         {
             AddLogMessage($"reallink is stopping");
             try
             {
-                client?.StopAsync();
+                await _client?.StopAsync();
             }
             catch (Exception ex)
             {

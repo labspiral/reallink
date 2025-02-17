@@ -85,6 +85,10 @@ reallinkcpp::value JSONToRealLinkValue(const nlohmann::json& j)
             }
             result[key] = value(arrayValues);
         }
+        else if (v.is_null())
+        {
+            // warning ! value is not assigned
+        }
         else
         {
             throw std::runtime_error("Unsupported JSON type for key: " + key);

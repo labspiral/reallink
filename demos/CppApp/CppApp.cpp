@@ -13,7 +13,11 @@ reallinkcpp::RealLinkClient* pRealLink = nullptr;
 
 void __cdecl OnReceive(const std::vector<reallinkcpp::value>& m)
 {
+    // m[0]: from (string)
+    // m[1]: message (string)
+    // m[2]: object (std::map)
     assert(m.size() == 3);
+
     std::string from = m[0].as_string();
     std::string message = m[1].as_string();
     std::cout << "Received: " << message << " From " << from << std::endl;
@@ -28,32 +32,58 @@ void __cdecl OnReceive(const std::vector<reallinkcpp::value>& m)
         bool success = sub.Deserialize(j);
         // do something
     }
+    else
+	{
+		std::cout << "Unknown message: " << message << std::endl;
+	}
 }
 
-void __cdecl OnReceiveForReturn(const std::vector<reallinkcpp::value>& m)
-{
-    assert(m.size() == 3 + 1); //with ticket no
+// c++ client is not supported 'OnResponse' callback function
+// 
+//void __cdecl OnResponse(const std::vector<reallinkcpp::value>& m)
+//{
+//    // m[0]: from (string)
+//    // m[1]: message (string)
+//	// m[2]: object (std::map)
+//    // m[3]: ticket no (double)
+//    assert(m.size() == 3 + 1); //with ticket no
+//
+//    std::string from = m[0].as_string();
+//    std::string message = m[1].as_string();
+//    //std::map value_map = m[2].as_map();
+//    double ticketNo = m[3].as_double();
+//
+//    std::cout << "Response: " << message << " From " << from << std::endl;
+//
+//    if (message == "substrate")
+//    {
+//        SUBSTRATE sub;
+//        sub.Name = m[2].as_string();
+//        sub.Rows = 1;
+//        sub.Cols = 1;
+//        sub.Units.push_back(UNIT(0, 0, 100));
+//        //...
+//        nlohmann::json j;
+//        sub.Serialize(j);
+//        //std::cout << j.dump(2) << std::endl;
+//        value v = JSONToRealLinkValue(j);
+//        try
+//        {
+//            //username, object, ticket number
+//            pRealLink->Response(from.c_str(), v, ticketNo);
+//        }
+//        catch (const std::exception& e)
+//        {
+//            std::cerr << e.what() << std::endl;
+//        }
+//    }
+//    else
+//    {
+//        std::cout << "Unknown message: " << message << std::endl;
+//    }
+//}
 
-    std::string from = m[0].as_string();
-    std::string message = m[1].as_string();
-    std::cout << "Received: " << message << " From " << from << std::endl;
-
-    if (message == "substrate")
-    {
-        assert(m[2].is_map());
-        nlohmann::json j = RealLinkValueToJSON(m[2].as_map());
-        //std::cout << j.dump(2) << std::endl;
-
-        SUBSTRATE sub;
-        bool success = sub.Deserialize(j);
-
-        double ticket = m[3].as_double();
-        value v = JSONToRealLinkValue(j);
-        std::vector<value> args{ v, ticket };
-    }
-}
-
-void CreateSubstrateAndSend(std::string name)
+bool SendSubstrate(std::string name)
 {
     SUBSTRATE sub;
     sub.Name = name;
@@ -71,33 +101,54 @@ void CreateSubstrateAndSend(std::string name)
     nlohmann::json jj = RealLinkValueToJSON(v);
     std::cout << jj.dump(2) << std::endl;
 
-    bool success = pRealLink->Send("winformapp", "substrate", v);
-    if (!success)
-        std::cerr << "Failed to send substrate" << std::endl;
+    try
+    {
+        bool success = pRealLink->Send("consoleapp", "substrate", v);
+        if (!success)
+            std::cerr << "Failed to send substrate" << std::endl;
+        return success;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
 }
 
 bool QuerySubstrate(std::string name)
 {
-    value v = pRealLink->SendForReturn("winformapp", "substrate", value(name));
-    if (!v.is_map())
+    try
+    {
+        value v = pRealLink->Request("consoleapp", "substrate", value(name));
+        if (!v.is_map())
+            return false;
+        nlohmann::json j = RealLinkValueToJSON(v);
+        std::cout << j.dump(2) << std::endl;
+
+        SUBSTRATE sub;
+        sub.Deserialize(j);
+        //...
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
         return false;
-
-    nlohmann::json j = RealLinkValueToJSON(v);
-    std::cout << j.dump(2) << std::endl;
-
-    SUBSTRATE sub;
-    sub.Deserialize(j);
-    //...
-    return true;
+    }
 }
 
+void RegisterCallBacks()
+{
+    pRealLink->On("Receive", &OnReceive);
+    // c++ client is not supported 'Response' callback function
+    //pRealLink->On("Response", &OnResponse);
+}
 
 
 int main()
 {
     pRealLink = reallinkcpp::CreateRealLink("http://localhost:5000", "reallink1", "cppapp");
-    pRealLink->On("Receive", &OnReceive);
-    pRealLink->On("ReceiveForReturn", &OnReceiveForReturn);
+    RegisterCallBacks();
 
     int i = 0;
     char buf[255] = { 0, };
@@ -105,13 +156,14 @@ int main()
 
     do
     {
-        printf("Demo for RealLink cpp client - (c)SpiralLAB\r\n");
-        printf("'1' : start\r\n");
-        printf("'2' : reconnect\r\n");
-        printf("'3' : send\r\n");
-        printf("'4' : stop\r\n");
-        printf("'Q' : quit\r\n");
-        printf("Select your target : ");
+        std::cout << "Demo for RealLink cpp client - (c)SpiralLAB" << std::endl;
+        std::cout << "'1' : start" << std::endl;
+        std::cout << "'2' : reconnect" << std::endl;
+        std::cout << "'3' : send" << std::endl;
+        std::cout << "'4' : response" << std::endl;
+        std::cout << "'5' : stop" << std::endl;
+        std::cout << "'Q' : quit" << std::endl;
+        std::cout << "Select your target : ";
 		char ch = _getch();
         std::cout << std::endl;
         switch (ch)
@@ -142,11 +194,15 @@ int main()
                 std::cerr << e.what() << std::endl;
             }
             break;
-        case '3':
-            sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i);
-            CreateSubstrateAndSend(buf);
+        case '3':           
+            sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i++);
+            SendSubstrate(buf);
             break;
         case '4':
+            sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i);
+            QuerySubstrate(buf);
+            break;
+        case '5':
             try
             {
                 pRealLink->Stop();

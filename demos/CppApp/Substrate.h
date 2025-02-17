@@ -32,6 +32,7 @@ typedef struct tagUnit
 
 typedef struct tagSubstrate 
 {
+public:
     std::string Name; 
     int Rows;
     int Cols;

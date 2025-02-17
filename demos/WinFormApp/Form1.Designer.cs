@@ -33,6 +33,7 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.btnReconnect = new System.Windows.Forms.Button();
+            this.btnRequest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSend
@@ -72,7 +73,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(303, 8);
+            this.btnStop.Location = new System.Drawing.Point(384, 8);
             this.btnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(75, 40);
@@ -92,11 +93,23 @@
             this.btnReconnect.UseVisualStyleBackColor = true;
             this.btnReconnect.Click += new System.EventHandler(this.btnReconnect_Click);
             // 
+            // btnRequest
+            // 
+            this.btnRequest.Location = new System.Drawing.Point(303, 8);
+            this.btnRequest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.btnRequest.Name = "btnRequest";
+            this.btnRequest.Size = new System.Drawing.Size(75, 40);
+            this.btnRequest.TabIndex = 5;
+            this.btnRequest.Text = "Request";
+            this.btnRequest.UseVisualStyleBackColor = true;
+            this.btnRequest.Click += new System.EventHandler(this.btnRequest_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(778, 544);
+            this.Controls.Add(this.btnRequest);
             this.Controls.Add(this.btnReconnect);
             this.Controls.Add(this.btnStop);
             this.Controls.Add(this.btnStart);
@@ -117,6 +130,7 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnReconnect;
+        private System.Windows.Forms.Button btnRequest;
     }
 }
 

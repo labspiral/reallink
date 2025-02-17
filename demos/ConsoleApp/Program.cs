@@ -11,27 +11,14 @@ namespace ConsoleApp
 {
     internal static class Program
     {
-        static void Main()
+        static SpiralLab.RealLink.Client client = null;
+
+       
+        static async Task Main()
         {
-            var client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "consoleapp");
-          
-            client.On("Receive",
-                new[] { typeof(string), typeof(string), typeof(object) },
-                (args, state) =>
-                {
-                    string userName = (string)args[0];
-                    string message = (string)args[1];
-                    object arg = args[2];
-                    switch( message)
-                    {
-                        case "substrate":
-                            var substrate = Helper.Deserialize<Substrate>(arg);
-                            Console.WriteLine($"{Environment.NewLine}{DateTime.Now} Receive: {userName} {message} {substrate?.ToString()}");
-                            break;
-                    }
-                    return Task.CompletedTask;
-                });
-            
+            client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "consoleapp");          
+            RegisterCallBacks();
+
             long no = 0;
             do
             {
@@ -39,7 +26,8 @@ namespace ConsoleApp
                 Console.WriteLine("'1' : start");
                 Console.WriteLine("'2' : reconnect");
                 Console.WriteLine("'3' : send");
-                Console.WriteLine("'4' : stop");
+                Console.WriteLine("'4' : request");
+                Console.WriteLine("'5' : stop");
                 Console.WriteLine("'Q' : quit");
                 Console.Write("Select your target : ");
                 ConsoleKeyInfo key = Console.ReadKey(false);
@@ -52,7 +40,7 @@ namespace ConsoleApp
                         Console.WriteLine("Starting Reallink Client 'c# console app' is running and try to connect");
                         try
                         {
-                            client.StartAsync();
+                            await client.StartAsync();
                         }
                         catch (Exception ex)
                         {
@@ -63,40 +51,54 @@ namespace ConsoleApp
                         Console.WriteLine("Reconnecting Reallink ...");
                         try
                         {
-                            client.ReconnectAsync();
+                            await client.ReconnectAsync();
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex.ToString());
                         }
                         break;
-                    case ConsoleKey.D3:                        
-                        var substrate = new Substrate();
-                        substrate.Name = $"CREATED FROM CONSOLE {no++}";
-                        var rnd = new Random();
-                        for (int i = 0; i < 4000; i++)
+                    case ConsoleKey.D3:
                         {
-                            int col = rnd.Next();
-                            int row = rnd.Next();
-                            int bin = rnd.Next() % 10;
-                            var unit = new Unit(col, row, bin);
-                            substrate.Rows = rnd.Next();
-                            substrate.Cols = rnd.Next();
-                            substrate.Units.Add(unit);
-                        }
-                        try
-                        {
-                            Task<bool> result = client.InvokeAsync<bool>("Send", "wpfapp", "substrate", substrate);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
+                            var substrate = new Substrate();
+                            substrate.Name = $"CREATED FROM CONSOLE {no++}";
+                            var rnd = new Random();
+                            for (int i = 0; i < 4000; i++)
+                            {
+                                int col = rnd.Next();
+                                int row = rnd.Next();
+                                int bin = rnd.Next() % 10;
+                                var unit = new Unit(col, row, bin);
+                                substrate.Rows = rnd.Next();
+                                substrate.Cols = rnd.Next();
+                                substrate.Units.Add(unit);
+                            }
+                            try
+                            {
+                                bool result = await client.InvokeAsync<bool>("Send", "wpfapp", "substrate", substrate);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
+                            }
                         }
                         break;
                     case ConsoleKey.D4:
                         try
                         {
-                            client.StopAsync();
+                            string name = $"CREATED FROM CONSOLE APP {no}";
+                            var substrate = await client.InvokeAsync<Substrate>("Request", "wpfapp", "substrate", name);
+                            // ...
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                        break;
+                    case ConsoleKey.D5:
+                        try
+                        {
+                            await client.StopAsync();
                         }
                         catch (Exception ex)
                         {
@@ -107,5 +109,68 @@ namespace ConsoleApp
             } while (true);
             client?.Dispose();
         }
+
+        static void RegisterCallBacks()
+        {
+            client.Closed += (exception) =>
+            {
+                if (exception == null)
+                    Console.WriteLine($"{Environment.NewLine}{DateTime.Now} Connection has closed");
+                else
+                    Console.WriteLine($"{Environment.NewLine}{DateTime.Now} Connection has closed due to an error: {exception.Message}");
+                return Task.CompletedTask;
+            };
+
+            client.On("Receive",
+                new[] { typeof(string), typeof(string), typeof(object) },
+                (args, state) =>
+                {
+                    string from = (string)args[0];
+                    string message = (string)args[1];
+                    object arg = args[2];
+                    switch (message)
+                    {
+                        case "substrate":
+                            var substrate = Helper.Deserialize<Substrate>(arg);
+                            Console.WriteLine($"{Environment.NewLine}{DateTime.Now} Receive: {from} {message} {substrate?.ToString()}");
+                            return Task.CompletedTask;
+                        default:
+                            return Task.FromException(new Exception($"Invalid message format: {message}"));
+                    }
+                });
+
+
+            client.On("Response",
+                new[] { typeof(string), typeof(string), typeof(object) },
+                async (args, state) =>
+                {
+                    string from = (string)args[0];
+                    string message = (string)args[1];
+                    object arg = args[2];
+                    Console.WriteLine($"{Environment.NewLine}{DateTime.Now} Response: {from} {message}");
+                    switch (message)
+                    {
+                        case "substrate":
+                            var substrate = new Substrate();
+                            var name = Helper.Deserialize<string>(args[2]);
+                            substrate.Name = name;
+                            var rnd = new Random();
+                            for (int i = 0; i < 4000; i++)
+                            {
+                                int col = rnd.Next();
+                                int row = rnd.Next();
+                                int bin = rnd.Next() % 10;
+                                var unit = new Unit(col, row, bin);
+                                substrate.Rows = rnd.Next();
+                                substrate.Cols = rnd.Next();
+                                substrate.Units.Add(unit);
+                            }
+                            return await Task.FromResult(substrate);
+                        default:
+                            return Task.FromException(new Exception($"Invalid message format: {message}"));
+                    }
+                });
+        }
+
     }
 }

@@ -6,7 +6,7 @@
 namespace reallinkcpp
 {
 
-#define REALLINKCPP_LIB_VERSION	"1.0.0"
+#define REALLINKCPP_LIB_VERSION	"1.1.80.0"
 
 
 #if defined REALLINKCPP_LIB_STATIC

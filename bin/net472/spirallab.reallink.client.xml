@@ -90,7 +90,7 @@
             <summary>
             Constructor
             </summary>
-            <param name="url">URL <br/>For example: http://localhost:5000</param>
+            <param name="url">URL <br/>For example: http://localhost:5000 (or https://localhost:5001)</param>
             <param name="hubName">Hub name<br/>For example: "reallink1"</param>
             <param name="userName">Client(or user) name<br/>For example: handler, mmi, vision, ... <br/>"all", "broadcast" or "others" are reserved.</param>
         </member>
@@ -306,6 +306,28 @@
         <member name="M:SpiralLab.RealLink.Helper.Deserialize``1(System.Object)">
             <summary>
             Deserialze target <c>object</c>
+            <code>
+            // Your deserialze code for customization :
+            if (arg is JsonElement jsonElement)
+            {
+                switch (jsonElement.ValueKind)
+                {
+                    case JsonValueKind.Array:
+                        foreach (JsonElement element in jsonElement.EnumerateArray())
+                            // your own code
+                        break;
+                    case JsonValueKind.Object:
+                        // your own code
+                        break;
+                    case JsonValueKind.String:
+                    case JsonValueKind.Null:
+                    case JsonValueKind.Number:
+                    default:    
+                        return JsonSerializer.Deserialize&lt;T&gt;((System.Text.Json.JsonElement)arg);
+                        break;
+                }
+            }
+            </code>
             </summary>
             <typeparam name="T">Target type</typeparam>
             <param name="arg">Raw <c>object</c></param>
