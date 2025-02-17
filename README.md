@@ -20,7 +20,7 @@ Support various client runtime environments.
 ## 3. Libraries
 ![server](https://github.com/user-attachments/assets/5e5d2b11-d8d2-4a3b-ad36-2a51c4c5c01f)
 spirallab.reallink.server.exe
-- Download latest version: http://spirallab.co.kr/reallink/spirallab.reallink.server.zip
+- Download latest version: http://spirallab.co.kr/download/spirallab.reallink.server.zip
 - RealLink server program must be executed at first 
 - Runtime: .NET8
  
