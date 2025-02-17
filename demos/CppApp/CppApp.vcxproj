@@ -72,12 +72,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\..\bin\cpp\$(Configuration)\</OutDir>
-    <IncludePath>$(VCPKG)\include\;$(VCPKG)\include\nlohmann;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\bin\$(Platform)\$(Configuration)\;$(VCPKG)\debug\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\bin\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\..\bin\cpp\$(Configuration)\</OutDir>
-    <LibraryPath>$(VCPKG)\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\..\bin\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
