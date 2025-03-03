@@ -3,7 +3,7 @@
 ![logo](https://github.com/user-attachments/assets/6600dc0d-21b5-4cef-bfc2-137149e24c67)
 
 ## 1. Features
-- Realtime communication between clients by Microsoft SignalR¢â web service.
+- Realtime communication between clients by Microsoft SignalR web service.
 - Can be passing arguments with serialized JSON object for remote clients.
 - Support asynchronous operation by async/await. 
 - Support cross platform environment.
@@ -36,10 +36,11 @@ spirallab.reallinkcpp.dll
  
 ## 4. How to use ?
 Must be execute reallink server "spirallab.reallink.server.exe" program at first.
-- Optional arguments: "spirallab.reallink.server.exe" [hub name] [http port] [https port] [max buffer size]
+- Optional arguments: "spirallab.reallink.server.exe" [hub name] [http port] [https port] [max buffer size] [max parallel invocations per client]
 - Default hub name: "reallink1"
 - Default http, https port: 5001, 5002
-- Default max. buffer size: 1048576 (= 1Mbytes)
+- Default max. buffer size: 1048576 (= 1M) bytes
+- Default max. parallel invocations per client: 5 
  
 For .NET clients
 - Add reference "spirallab.reallink.client.dll" file into project
@@ -63,7 +64,7 @@ For c++ clients
        'A'        |                    |        'B'
                   |                    |
                   |                    |
-Invoke('B', __.   |                    |
+Invoke('B', ____  |                    |
     message,    \ |                    |
     object)      \|                    |
                   |----  "Send"  ----->|---> On("Receive")
@@ -73,13 +74,13 @@ Invoke('B', __.   |                    |
                   .                    .         
                   .                    .
                   .                    .     
-  Invoke('B', _   .                    . 
+  Invoke('B', __  .                    . 
       message,  \ |                    |
       object)    \|                    |
                   |---- "Request" ---->|---> On("Response")
                   |                    |     { 
                   |                    |         return ...;
-                .-|<-------------------|<--- }
+                --|<-------------------|<--- }
                /  |                    |
   await...  __/   |                    |
                   |                    |
@@ -88,15 +89,9 @@ Invoke('B', __.   |                    |
 
 ## 7. Server Hub APIs
 ```
-// Server side:
-public async Task<bool> Send(string userName, string message, object arg);
-// Client side:
-public Task Receive(string userName, string message, object arg);
-
-// Server side:
-public async Task<object> Request(string userName, string message, object arg);
-// Client side:
-public Task<object> Response(string userName, string message, object arg);
+// Server side:                                                                       // Client side:
+public async Task<bool> Send(string userName, string message, object arg);      --->  public Task Receive(string userName, string message, object arg);
+public async Task<object> Request(string userName, string message, object arg); --->  public Task<object> Response(string userName, string message, object arg);
 ```
 
 
@@ -127,10 +122,40 @@ var response = await client.InvokeAsync<TResult>("Request", "username", "command
 reallinkcpp::RealLinkClient* client = reallinkcpp::CreateRealLink("http://localhost:5000", "hubname", "username");
 void __cdecl OnReceive(const std::vector<reallinkcpp::value>& v) 
 { 
-    ... 
+    // m[0]: from (string)
+    // m[1]: message (string)
+    // m[2]: object (std::map)
+    assert(m.size() == 3);
+    std::string from = m[0].as_string();
+    std::string message = m[1].as_string();
+    if (message == "target message")
+    {
+        ...
+    }
+}
+void __cdecl OnResponse(const std::vector<reallinkcpp::value>& m)
+{
+    // m[0]: from (string)
+    // m[1]: message (string)
+	// m[2]: object (std::map)
+    // m[3]: transaction no (double)
+    assert(m.size() == 3 + 1); //with transaction no
+    std::string from = m[0].as_string();
+    std::string message = m[1].as_string();
+    double transactionNo = m[3].as_double();
+    try
+    {
+        reallinkcpp::value v;
+        ...
+        client->Response(from.c_str(), v, transactionNo);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 client->On("Receive", &OnReceive);
-//"Request" is not supported at C++ client
+client->On("Response", &OnResponse);
 client->Start();
 ...
 bool success = client->Send("username", "command", reallinkcpp::value(arg));
@@ -146,6 +171,15 @@ reallinkcpp::value response = client->Request("username", "command", reallinkcpp
   
  
 ## 11. Version history
+* 2024.3.4 v1.2.100.0
+   - server
+      - added) default max. parallel invocations per client: 10
+      - added) default send/request timeout: 5s
+      - fixed) memory leak issue
+   - c++ client 
+      - now support OnResponse callback
+   - demos
+      - added) target to 'all' at demo project
 * 2025.2.17 v1.1.80.0
    - fixed) server
       - change) server hub APIs 
