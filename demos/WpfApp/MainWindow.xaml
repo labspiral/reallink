@@ -15,6 +15,7 @@
             <Button Content="Start" Width="100" Command="{Binding StartCommand}" />
             <Button Content="Reconnect" Width="100" Command="{Binding ReconnectCommand}" />
             <Button Content="Send" Width="100" Command="{Binding SendCommand}" />
+            <Button Content="Send(All)" Width="100" Command="{Binding SendAllCommand}" />
             <Button Content="Request" Width="100" Command="{Binding RequestCommand}" />
             <Button Content="Stop" Width="100" Command="{Binding StopCommand}" />
         </StackPanel >

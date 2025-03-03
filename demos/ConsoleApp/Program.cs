@@ -26,8 +26,9 @@ namespace ConsoleApp
                 Console.WriteLine("'1' : start");
                 Console.WriteLine("'2' : reconnect");
                 Console.WriteLine("'3' : send");
-                Console.WriteLine("'4' : request");
-                Console.WriteLine("'5' : stop");
+                Console.WriteLine("'4' : send(all)");
+                Console.WriteLine("'5' : request");
+                Console.WriteLine("'6' : stop");
                 Console.WriteLine("'Q' : quit");
                 Console.Write("Select your target : ");
                 ConsoleKeyInfo key = Console.ReadKey(false);
@@ -84,6 +85,31 @@ namespace ConsoleApp
                         }
                         break;
                     case ConsoleKey.D4:
+                        {
+                            var substrate = new Substrate();
+                            substrate.Name = $"CREATED FROM CONSOLE {no++}";
+                            var rnd = new Random();
+                            for (int i = 0; i < 4000; i++)
+                            {
+                                int col = rnd.Next();
+                                int row = rnd.Next();
+                                int bin = rnd.Next() % 10;
+                                var unit = new Unit(col, row, bin);
+                                substrate.Rows = rnd.Next();
+                                substrate.Cols = rnd.Next();
+                                substrate.Units.Add(unit);
+                            }
+                            try
+                            {
+                                bool result = await client.InvokeAsync<bool>("Send", "all", "substrate", substrate);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
+                            }
+                        }
+                        break;
+                    case ConsoleKey.D5:
                         try
                         {
                             string name = $"CREATED FROM CONSOLE APP {no}";
@@ -95,7 +121,7 @@ namespace ConsoleApp
                             Console.WriteLine(ex.ToString());
                         }
                         break;
-                    case ConsoleKey.D5:
+                    case ConsoleKey.D6:
                         try
                         {
                             await client.StopAsync();

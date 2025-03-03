@@ -38,52 +38,50 @@ void __cdecl OnReceive(const std::vector<reallinkcpp::value>& m)
 	}
 }
 
-// c++ client is not supported 'OnResponse' callback function
-// 
-//void __cdecl OnResponse(const std::vector<reallinkcpp::value>& m)
-//{
-//    // m[0]: from (string)
-//    // m[1]: message (string)
-//	// m[2]: object (std::map)
-//    // m[3]: ticket no (double)
-//    assert(m.size() == 3 + 1); //with ticket no
-//
-//    std::string from = m[0].as_string();
-//    std::string message = m[1].as_string();
-//    //std::map value_map = m[2].as_map();
-//    double ticketNo = m[3].as_double();
-//
-//    std::cout << "Response: " << message << " From " << from << std::endl;
-//
-//    if (message == "substrate")
-//    {
-//        SUBSTRATE sub;
-//        sub.Name = m[2].as_string();
-//        sub.Rows = 1;
-//        sub.Cols = 1;
-//        sub.Units.push_back(UNIT(0, 0, 100));
-//        //...
-//        nlohmann::json j;
-//        sub.Serialize(j);
-//        //std::cout << j.dump(2) << std::endl;
-//        value v = JSONToRealLinkValue(j);
-//        try
-//        {
-//            //username, object, ticket number
-//            pRealLink->Response(from.c_str(), v, ticketNo);
-//        }
-//        catch (const std::exception& e)
-//        {
-//            std::cerr << e.what() << std::endl;
-//        }
-//    }
-//    else
-//    {
-//        std::cout << "Unknown message: " << message << std::endl;
-//    }
-//}
+void __cdecl OnResponse(const std::vector<reallinkcpp::value>& m)
+{
+    // m[0]: from (string)
+    // m[1]: message (string)
+	// m[2]: object (std::map)
+    // m[3]: transaction no (double)
+    assert(m.size() == 3 + 1); //with transaction no
 
-bool SendSubstrate(std::string name)
+    std::string from = m[0].as_string();
+    std::string message = m[1].as_string();
+    //std::map value_map = m[2].as_map();
+    double ticketNo = m[3].as_double();
+
+    std::cout << "Response: " << message << " From " << from << std::endl;
+
+    if (message == "substrate")
+    {
+        SUBSTRATE sub;
+        sub.Name = m[2].as_string();
+        sub.Rows = 1;
+        sub.Cols = 1;
+        sub.Units.push_back(UNIT(0, 0, 100));
+        //...
+        nlohmann::json j;
+        sub.Serialize(j);
+        //std::cout << j.dump(2) << std::endl;
+        value v = JSONToRealLinkValue(j);
+        try
+        {
+            //username, object, transaction no
+            pRealLink->Response(from.c_str(), v, ticketNo);
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Unknown message: " << message << std::endl;
+    }
+}
+
+bool SendSubstrate(std::string name, bool isToAll = false)
 {
     SUBSTRATE sub;
     sub.Name = name;
@@ -103,7 +101,12 @@ bool SendSubstrate(std::string name)
 
     try
     {
-        bool success = pRealLink->Send("consoleapp", "substrate", v);
+        bool success = false;
+        if (!isToAll)
+            success = pRealLink->Send("consoleapp", "substrate", v);
+        else
+            success = pRealLink->Send("all", "substrate", v);
+
         if (!success)
             std::cerr << "Failed to send substrate" << std::endl;
         return success;
@@ -120,6 +123,8 @@ bool QuerySubstrate(std::string name)
     try
     {
         value v = pRealLink->Request("consoleapp", "substrate", value(name));
+        if (v.is_null())
+            return false;
         if (!v.is_map())
             return false;
         nlohmann::json j = RealLinkValueToJSON(v);
@@ -140,15 +145,14 @@ bool QuerySubstrate(std::string name)
 void RegisterCallBacks()
 {
     pRealLink->On("Receive", &OnReceive);
-    // c++ client is not supported 'Response' callback function
-    //pRealLink->On("Response", &OnResponse);
+    pRealLink->On("Response", &OnResponse);
 }
 
 
 int main()
 {
     pRealLink = reallinkcpp::CreateRealLink("http://localhost:5000", "reallink1", "cppapp");
-    RegisterCallBacks();
+
 
     int i = 0;
     char buf[255] = { 0, };
@@ -160,8 +164,9 @@ int main()
         std::cout << "'1' : start" << std::endl;
         std::cout << "'2' : reconnect" << std::endl;
         std::cout << "'3' : send" << std::endl;
-        std::cout << "'4' : response" << std::endl;
-        std::cout << "'5' : stop" << std::endl;
+        std::cout << "'4' : send(all)" << std::endl;
+        std::cout << "'5' : request" << std::endl;
+        std::cout << "'6' : stop" << std::endl;
         std::cout << "'Q' : quit" << std::endl;
         std::cout << "Select your target : ";
 		char ch = _getch();
@@ -176,6 +181,7 @@ int main()
 			std::cout << "Starting Reallink Client 'cpp app' is running and try to connect" << std::endl;
             try
             {
+                RegisterCallBacks();
                 pRealLink->Start();
             }
             catch (const std::exception& e)
@@ -199,10 +205,14 @@ int main()
             SendSubstrate(buf);
             break;
         case '4':
+            sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i++);
+            SendSubstrate(buf, true);
+            break;
+        case '5':
             sprintf_s(buf, "SUBSTRATE_TESTNAME_%d", i);
             QuerySubstrate(buf);
             break;
-        case '5':
+        case '6':
             try
             {
                 pRealLink->Stop();

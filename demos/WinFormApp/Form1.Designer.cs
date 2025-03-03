@@ -34,6 +34,7 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.btnReconnect = new System.Windows.Forms.Button();
             this.btnRequest = new System.Windows.Forms.Button();
+            this.btnSendAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnSend
@@ -53,11 +54,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 15;
+            this.listBox1.ItemHeight = 25;
             this.listBox1.Location = new System.Drawing.Point(5, 57);
             this.listBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(770, 469);
+            this.listBox1.Size = new System.Drawing.Size(770, 454);
             this.listBox1.TabIndex = 4;
             // 
             // btnStart
@@ -73,7 +74,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(384, 8);
+            this.btnStop.Location = new System.Drawing.Point(479, 8);
             this.btnStop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(75, 40);
@@ -95,7 +96,7 @@
             // 
             // btnRequest
             // 
-            this.btnRequest.Location = new System.Drawing.Point(303, 8);
+            this.btnRequest.Location = new System.Drawing.Point(384, 8);
             this.btnRequest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.btnRequest.Name = "btnRequest";
             this.btnRequest.Size = new System.Drawing.Size(75, 40);
@@ -104,11 +105,23 @@
             this.btnRequest.UseVisualStyleBackColor = true;
             this.btnRequest.Click += new System.EventHandler(this.btnRequest_Click);
             // 
+            // btnSendAll
+            // 
+            this.btnSendAll.Location = new System.Drawing.Point(303, 8);
+            this.btnSendAll.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.btnSendAll.Name = "btnSendAll";
+            this.btnSendAll.Size = new System.Drawing.Size(75, 40);
+            this.btnSendAll.TabIndex = 6;
+            this.btnSendAll.Text = "Send (All)";
+            this.btnSendAll.UseVisualStyleBackColor = true;
+            this.btnSendAll.Click += new System.EventHandler(this.btnSendAll_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(778, 544);
+            this.Controls.Add(this.btnSendAll);
             this.Controls.Add(this.btnRequest);
             this.Controls.Add(this.btnReconnect);
             this.Controls.Add(this.btnStop);
@@ -131,6 +144,7 @@
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnReconnect;
         private System.Windows.Forms.Button btnRequest;
+        private System.Windows.Forms.Button btnSendAll;
     }
 }
 

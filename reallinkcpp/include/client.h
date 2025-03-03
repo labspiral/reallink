@@ -109,16 +109,18 @@ namespace reallinkcpp
 		/// <param name="userName">User(or client) name.<br/>"all", "broadcast" or "others" are not allowed.</param>
 		/// <param name="message">Send message</param>
 		/// <param name="v">Send object by value (string, double, array, map, ...)</param>
+		/// <param name="timeOutMsec">Timeout (msec)</param>
 		/// <returns>Returned(or responsed) <c>value</c>.<br/>If <c>null</c> if client(or username) is not exist.<br/></returns>
-		value __stdcall Request(const char* lpUserName, const char* lpMessage, const value& v);
+		value __stdcall Request(const char* lpUserName, const char* lpMessage, const value& v, long timeOutMsec = 5000);
 
-		///// <summary>
-		///// Response data to client  
-		///// </summary>
-		///// <param name="userName">User(or client) name.<br/>Must be same user by from.</param>
-		///// <param name="v">Send object by value (string, double, array, map, ...)</param>
-		///// <param name="ticketNo">Received ticket value</param>
-		//void __stdcall Response(const char* lpUserName, const value& v, double ticketNo);
+		/// <summary>
+		/// Response data to client  
+		/// </summary>
+		/// <param name="userName">User(or client) name.<br/>Must be same user by from.</param>
+		/// <param name="v">Send object by value (string, double, array, map, ...)</param>
+		/// <param name="transactionNo">Received transaction number</param>
+		/// <returns>If <c>false</c>, something has went wrong.</returns>
+		bool __stdcall Response(const char* lpUserName, const value& v, double transactionNo);
 	private:
 		RealLinkClientPimpl* _pPimpl;
 
@@ -126,7 +128,7 @@ namespace reallinkcpp
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="lpszUrl">URI<br/>For example: http://locahost:5000</param>
+		/// <param name="lpszUrl">URI<br/>For example: http://locahost:5000 (or https://locahost:5001)</param>
 		/// <param name="lpszHubName">Hub name<br/>For example: reallink1</param>
 		/// <param name="lpszUserName">Client user name<br/>'all', 'broadcast' or 'others' are reserved.</param>
 		RealLinkClient(const char* lpUrl, const char* lpHubName, const char* lpUserName);
@@ -136,7 +138,7 @@ namespace reallinkcpp
 	/// <summary>
 	/// Create reallink client
 	/// </summary>
-	/// <param name="lpszUrl">URI<br/>For example: http://locahost:5000</param>
+	/// <param name="lpszUrl">URI<br/>For example: http://locahost:5000 (or https://locahost:5001)</param>
 	/// <param name="lpszHubName">Hub name<br/>For example: reallink1</param>
 	/// <param name="lpszUserName">Client user name<br/>'all', 'broadcast' or 'others' are reserved.</param>
 	/// <returns><c>RealLinkClient</c></returns>

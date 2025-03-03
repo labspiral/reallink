@@ -23,7 +23,6 @@ namespace WindowsFormsApp
         {
             InitializeComponent();
             _client = new SpiralLab.RealLink.Client("http://localhost:5000", "reallink1", "winformapp");
-            RegisterCallBacks();
 
         }
 
@@ -113,6 +112,7 @@ namespace WindowsFormsApp
             Debug.Assert(_client != null);
             try
             {
+                RegisterCallBacks();
                 await _client.StartAsync();
             }
             catch (Exception ex)
@@ -159,15 +159,39 @@ namespace WindowsFormsApp
                 AddLogMessage($"{ex.Message}");
             }
         }
+        private async void btnSendAll_Click(object sender, EventArgs e)
+        {
+            var substrate = new Substrate();
+            substrate.Name = $"CREATED FROM WINFORM APP {no++}";
+            var rnd = new Random();
+            for (int i = 0; i < 4000; i++)
+            {
+                int col = rnd.Next();
+                int row = rnd.Next();
+                int bin = rnd.Next() % 10;
+                var unit = new Unit(col, row, bin);
+                substrate.Rows = rnd.Next();
+                substrate.Cols = rnd.Next();
+                substrate.Units.Add(unit);
+            }
+            try
+            {
+                bool result = await _client.InvokeAsync<bool>("Send", "all", "substrate", substrate);
+            }
+            catch (Exception ex)
+            {
+                AddLogMessage($"{ex.Message}");
+            }
+        }
         private async void btnRequest_Click(object sender, EventArgs e)
         {
             try
             {
                 // c++ client is not supported 'Request' method
                 //
-                //string name = $"CREATED FROM WINFORM APP {no}";
-                //var substrate = await _client.InvokeAsync<Substrate>("Request", "cppapp", "substrate", name);
-                //AddLogMessage($"Request: {substrate}");
+                string name = $"CREATED FROM WINFORM APP {no}";
+                var substrate = await _client.InvokeAsync<Substrate>("Request", "cppapp", "substrate", name);
+                AddLogMessage($"Request: {substrate}");
             }
             catch (Exception ex)
             {
@@ -186,6 +210,7 @@ namespace WindowsFormsApp
                 AddLogMessage($"{ex.Message}");
             }
         }
+
 
     }
 }
